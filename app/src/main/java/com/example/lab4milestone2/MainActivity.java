@@ -56,33 +56,31 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        if(Build.VERSION.SDK_INT < 23){
-            startListening();
-        }
-        else {
-            if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager.PERMISSION_GRANTED)
-            {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},1);
-            }
-            else
-            {
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,0,0,locationListener);
-                Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                if(location != null)
-                {
-                    // update location info
-                    updateLocationInfo(location);
-                }
-            }
-        }
+        startListening();
 
+        if(Build.VERSION.SDK_INT >= 23 &&
+                ActivityCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+        {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        }
+        else
+        {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,0,0,locationListener);
+            Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            if(location != null)
+            {
+                // update location info
+                updateLocationInfo(location);
+            }
+
+        }
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions,grantResults);
 
-        if(grantResults.length > 0 &&grantResults[0] == PackageManager.PERMISSION_GRANTED)
+        if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
             startListening();
     }
     public void updateLocationInfo(Location location)
@@ -102,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
         Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
 
         try{
+
             String address = "Could not get address";
             List<Address> listAddresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(),1);
 
@@ -126,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
                     address += listAddresses.get(0).getCountryName() + " ";
             }
 
-            TextView addrText = findViewById(R.id.address);
+            TextView addrText = (TextView) findViewById(R.id.address);
             addrText.setText(address);
 
         } catch (IOException e){
